@@ -1,9 +1,6 @@
-/**
- * @format
- */
-
-import {AppRegistry} from 'react-native';
+import { registerRootComponent } from 'expo';
 import App from './App';
-import {name as appName} from './app.json';
+import GameScreen from './src/screens/GameScreen'
 
-AppRegistry.registerComponent(appName, () => App);
+// Register the root component
+registerRootComponent(GameScreen);
