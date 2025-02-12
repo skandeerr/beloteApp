@@ -11,7 +11,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^21.10.0",
+    "@react-native-firebase/database": "^21.10.0",
+    "@react-native-firebase/firestore": "^21.10.0",
+    "@react-navigation/stack": "^7.1.1",
+    "core-js": "^3.40.0",
     "expo": "^52.0.31",
+    "expo-screen-orientation": "~8.0.4",
     "i18next": "^24.2.2",
     "react": "18.3.1",
     "react-i18next": "^15.4.0",
@@ -20,8 +26,7 @@
     "react-native-reanimated": "^3.16.7",
     "react-native-svg": "^15.11.1",
     "react-native-vector-icons": "^10.2.0",
-    "setimmediate": "^1.0.5",
-    "expo-screen-orientation": "~8.0.4"
+    "setimmediate": "^1.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

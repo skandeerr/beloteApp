@@ -11,6 +11,17 @@ export const createDeck = () => {
       }))
     );
   };
+  export const organizeHand = (hand) => {
+    const suitsOrder = ['clubs', 'diamonds', 'hearts', 'spades'];
+    const rankOrder = ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    
+    return suitsOrder.map(suit => ({
+      suit,
+      cards: hand
+        .filter(card => card.suit === suit)
+        .sort((a, b) => rankOrder.indexOf(a.rank) - rankOrder.indexOf(b.rank))
+    })).filter(group => group.cards.length > 0);
+  };
   
   const getCardValue = (rank) => {
     const values = { '7': 0, '8': 0, '9': 14, '10': 10, 'J': 20, 'Q': 3, 'K': 4, 'A': 11 };
@@ -93,6 +104,40 @@ export class BeloteGame {
 
   calculateScores() {
     // Implement scoring logic based on Belote rules
+  }
+  handleAnnounce(playerIndex, announceValue) {
+    if (announceValue === 'Pass') {
+      this.announces.push({ playerIndex, value: 0 });
+    } else {
+      this.announces.push({ playerIndex, value: announceValue });
+    }
+    
+    if (this.announces.length === 4) {
+      this.resolveAnnounces();
+    }
+  }
+
+  resolveAnnounces() {
+    const validAnnounces = this.announces.filter(a => a.value !== 0);
+    if (validAnnounces.length === 0) {
+      this.startNewRound();
+      return;
+    }
+
+    const highestAnnounce = validAnnounces.reduce((max, curr) => 
+      curr.value > max.value ? curr : max
+    );
+    
+    this.scores[highestAnnounce.playerIndex % 2 === 0 ? 'team1' : 'team2'] += highestAnnounce.value;
+    this.startNewRound();
+  }
+
+  startNewRound() {
+    this.deck = createDeck();
+    this.shuffleDeck();
+    this.dealCards();
+    this.announces = [];
+    this.currentPlayer = 0;
   }
 }
      

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "948583177395",
+    "project_id": "belote-4beed",
+    "storage_bucket": "belote-4beed.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948583177395:android:edd88e8a92807c60b2a4c6",
+        "android_client_info": {
+          "package_name": "tn.factory.belote"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChfu8pi0eoV2XrqEkxbuLeODoSyVTd_6U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
