@@ -38,7 +38,7 @@ const lockToLandscape = async () => {
   }, []);
     return (
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Room" component={RoomManager} />
           <Stack.Screen name="Game" component={GameScreen} />
         </Stack.Navigator>

@@ -1,15 +1,28 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-// import { db, ref, set, onValue } from '../../services/firebase';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Button, 
+  StyleSheet, 
+  ActivityIndicator, 
+  Alert, 
+  Modal,
+  TouchableOpacity
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { db, ref, set, onValue, push } from '../../services/firebase';
-
+import { db, ref, set, push, get } from '../../services/firebase';
+import * as Clipboard from 'expo-clipboard';
 
 const RoomManager = () => {
   const navigation = useNavigation();
   const [roomCode, setRoomCode] = useState('');
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
+
+  // New state to manage the room modal
+  const [roomModalVisible, setRoomModalVisible] = useState(false);
+  const [createdRoomId, setCreatedRoomId] = useState(null);
 
   // Function to create a new room
   const createRoom = async () => {
@@ -28,8 +41,9 @@ const RoomManager = () => {
         game: null,
       });
 
-      // Navigate to the game screen
-      navigation.navigate('Game', { roomId });
+      // Save the created room id and show the modal
+      setCreatedRoomId(roomId);
+      setRoomModalVisible(true);
     } catch (error) {
       Alert.alert('Error', 'Failed to create room. Please try again.');
       console.error(error);
@@ -48,29 +62,45 @@ const RoomManager = () => {
     setJoining(true);
     try {
       const roomRef = ref(db, `rooms/${roomCode}`);
-      onValue(roomRef, (snapshot) => {
-        if (!snapshot.exists()) {
-          Alert.alert('Error', 'Invalid room code.');
+      const snapshot = await get(roomRef);
+      if (!snapshot.exists()) {
+        Alert.alert('Error', 'Invalid room code.');
+      } else {
+        const room = snapshot.val();
+        if (room.players.length >= 4) {
+          Alert.alert('Error', 'Room is full.');
         } else {
-          const room = snapshot.val();
-          if (room.players.length >= 4) {
-            Alert.alert('Error', 'Room is full.');
-          } else {
-            // Add the new player to the room
-            const updatedPlayers = [...room.players, { id: `player${room.players.length + 1}`, name: `Player ${room.players.length + 1}` }];
-            set(ref(db, `rooms/${roomCode}/players`), updatedPlayers);
+          // Add the new player to the room
+          const updatedPlayers = [
+            ...room.players,
+            { id: `player${room.players.length + 1}`, name: `Player ${room.players.length + 1}` }
+          ];
+          await set(ref(db, `rooms/${roomCode}/players`), updatedPlayers);
 
-            // Navigate to the game screen
-            navigation.navigate('Game', { roomId: roomCode });
-          }
+          // Navigate to the game screen
+          navigation.navigate('Game', { roomId: roomCode });
         }
-      });
+      }
     } catch (error) {
       Alert.alert('Error', 'Failed to join room. Please try again.');
       console.error(error);
     } finally {
       setJoining(false);
     }
+  };
+
+  // Function to copy the room code to the clipboard
+  const copyRoomCode = async () => {
+    if (createdRoomId) {
+      await Clipboard.setStringAsync(createdRoomId);
+      Alert.alert('Copied!', 'Room code copied to clipboard.');
+    }
+  };
+
+  // Function to continue after showing the room modal
+  const continueToGame = () => {
+    setRoomModalVisible(false);
+    navigation.navigate('Game', { roomId: createdRoomId });
   };
 
   return (
@@ -103,6 +133,27 @@ const RoomManager = () => {
 
       {/* Loading Indicator */}
       {(creating || joining) && <ActivityIndicator size="large" color="#0000ff" />}
+
+      {/* Modal for Room Code */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={roomModalVisible}
+        onRequestClose={() => setRoomModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Room Created!</Text>
+            <Text style={styles.modalText}>Room Code: {createdRoomId}</Text>
+            <TouchableOpacity style={styles.copyButton} onPress={copyRoomCode}>
+              <Text style={styles.copyButtonText}>Copy Room Code</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.continueButton} onPress={continueToGame}>
+              <Text style={styles.continueButtonText}>Continue to Game</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -128,6 +179,51 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     fontSize: 16,
     color: '#666',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  copyButton: {
+    backgroundColor: '#FFD700',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  copyButtonText: {
+    color: '#1E441E',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  continueButton: {
+    backgroundColor: '#1E441E',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  continueButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Card from '../components/Card';
+import { organizeHand } from '../game/GameLogic';
 
 const cardBack = require('../assets/cardback.png'); // Ensure you have a card back image
 
@@ -50,7 +51,7 @@ const GameTable = ({ game }) => {
       <View style={styles.bottomPlayer}>
         <Text style={styles.playerName}>{player1.name}</Text>
         <View style={styles.hand}>
-          {player1.hand.map((card, index) => (
+          {organizeHand(player1.hand).map((card, index) => (
             <Card 
               key={index}
               card={card}
